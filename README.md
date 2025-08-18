@@ -211,8 +211,3 @@ If you find our work helpful for your research, please consider citing our paper
 ## 📬 Contact Us
 
 If you have any questions or suggestions, feel free to reach out via [GitHub Issues](https://github.com/WeChatCV/Stand-In/issues) . We look forward to your feedback!
-
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=WeChatCV/Stand-In&type=Timeline)](https://www.star-history.com/#WeChatCV/Stand-In&Timeline)
