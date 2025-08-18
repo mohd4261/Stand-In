@@ -18,7 +18,7 @@ class VaceWanAttentionBlock(DiTBlock):
         else:
             all_c = list(torch.unbind(c))
             c = all_c.pop(-1)
-        c = super().forward(c, context, t_mod, freqs)
+        c, _ = super().forward(c, context, t_mod, freqs)
         c_skip = self.after_proj(c)
         all_c += [c_skip, c]
         c = torch.stack(all_c)

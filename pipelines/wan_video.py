@@ -5,11 +5,13 @@ from einops import repeat
 from typing import Optional, Union
 from einops import rearrange
 import numpy as np
-from PIL import Image
 from tqdm import tqdm
 from typing import Optional
 from typing_extensions import Literal
-
+import imageio
+import os
+from typing import List
+import PIL
 from utils import BasePipeline, ModelConfig, PipelineUnit, PipelineUnitRunner
 from models import ModelManager, load_state_dict
 from models.wan_video_dit import WanModel, RMSNorm, sinusoidal_embedding_1d
@@ -32,6 +34,16 @@ from vram_management import (
 )
 from lora import GeneralLoRALoader
 
+def load_video_as_list(video_path: str) -> List[Image.Image]:
+    if not os.path.isfile(video_path):
+        raise FileNotFoundError(video_path)
+    reader = imageio.get_reader(video_path)
+    frames = []
+    for i, frame_data in enumerate(reader):
+        pil_image = Image.fromarray(frame_data)
+        frames.append(pil_image)
+    reader.close()
+    return frames
 
 class WanVideoPipeline(BasePipeline):
     def __init__(self, device="cuda", torch_dtype=torch.bfloat16, tokenizer_path=None):
@@ -494,6 +506,10 @@ class WanVideoPipeline(BasePipeline):
     ):
         if ip_image is not None:
             ip_image = self.encode_ip_image(ip_image)
+        if vace_video is not None:
+            vace_video = load_video_as_list(vace_video)
+        if vace_reference_image is not None:
+            vace_reference_image = PIL.Image.open(vace_reference_image)
         # Scheduler
         self.scheduler.set_timesteps(
             num_inference_steps,
@@ -1664,7 +1680,7 @@ def model_fn_wan_video(
         tea_cache_update = False
 
     if vace_context is not None:
-        vace_hints = vace(x, vace_context, context, t_mod, freqs)
+        vace_hints = vace(x, vace_context, context, t_mod, freqs_original)
 
     # blocks
     if use_unified_sequence_parallel:

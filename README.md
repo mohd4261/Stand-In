@@ -22,6 +22,8 @@
 ---
 
 ## 🔥 News
+* **[2025.08.18]** We have released a version compatible with VACE. Not only pose control, but you can also try other control methods such as depth maps, combined with Stand-In to maintain identity simultaneously.
+
 * **[2025.08.16]** We have updated the experimental version of the face swapping feature. Feel free to try it out!
 
 * **[2025.08.13]** Special thanks to @kijai for integrating Stand-In into the custom ComfyUI node **WanVideoWrapper**. However, the implementation differs from the official version, which may affect Stand-In’s performance.  
@@ -174,12 +176,31 @@ python infer_face_swap.py \
     --output "test/output/ruonan.mp4" \
     --denoising_strength 0.85
 ```
-
 **Note**: Since Wan2.1 itself does not have an inpainting function, our face swapping feature is still experimental.
 
 The higher the denoising_strength, the more the background area is redrawn, and the more natural the face area becomes. Conversely, the lower the denoising_strength, the less the background area is redrawn, and the higher the degree of overfitting in the face area.
 
 You can set --force_background_consistency to make the background completely consistent, but this may lead to potential and noticeable contour issues. Enabling this feature requires experimenting with different denoising_strength values to achieve the most natural effect. If slight changes to the background are not a concern, please do not enable this feature.
+
+
+### Infer with VACE
+Use the `infer_with_vace.py` script to perform identity-preserving video generation with Stand-In, compatible with VACE.
+```bash
+python infer_with_vace.py \
+    --prompt "A woman raises her hands." \
+    --vace_path "checkpoints/VACE/" \
+    --ip_image "test/input/first_frame.png" \
+    --reference_video "test/input/pose.mp4" \
+    --reference_image "test/input/first_frame.png" \
+    --output "test/output/woman.mp4" \
+    --vace_scale 0.8
+```
+You need to download the corresponding weights from the `VACE` repository or provide the path to the `VACE` weights in the `vace_path` parameter.
+
+The input control video needs to be preprocessed using VACE's preprocessing tool. Both `reference_video` and `reference_image` are optional and can exist simultaneously. Additionally, VACE’s control has a preset bias towards faces, which affects identity preservation. Please lower the `vace_scale` to a balance point where both motion and identity are preserved. When only `ip_image` and `reference_video` are provided, the weight can be reduced to 0.5.
+
+Using both Stand-In and VACE together is more challenging than using Stand-In alone. We are still maintaining this feature, so if you encounter unexpected outputs or have other questions, feel free to raise them in the issue.
+
 
 ## 🤝 Acknowledgements
 

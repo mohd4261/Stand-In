@@ -5,11 +5,17 @@ from pipelines.wan_video_face_swap import WanVideoPipeline_FaceSwap
 
 
 def load_wan_pipe(
-    base_path, torch_dtype=torch.bfloat16, face_swap=False, device="cuda"
+    base_path, torch_dtype=torch.bfloat16, face_swap=False, use_vace=False, device="cuda"
 ):
-    diffusion_model_files = [
-        f"diffusion_pytorch_model-0000{i}-of-00006.safetensors" for i in range(1, 7)
-    ]
+    if not use_vace:
+        diffusion_model_files = [
+            f"diffusion_pytorch_model-0000{i}-of-00006.safetensors" for i in range(1, 7)
+        ]
+    else:
+        diffusion_model_files = [
+            f"diffusion_pytorch_model-0000{i}-of-00007.safetensors" for i in range(1, 8)
+        ]    
+    
     diffusion_model_paths = [
         os.path.join(base_path, fname) for fname in diffusion_model_files
     ]

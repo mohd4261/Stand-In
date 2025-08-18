@@ -10,20 +10,35 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ip_image",
     type=str,
-    default="test/input/lecun.jpg",
+    default="test/input/first_frame.png",
     help="Input face image path or URL",
 )
 parser.add_argument(
-    "--lora_path", type=str, required=True, help="Text prompt for video generation"
+    "--reference_video",
+    type=str,
+    default="test/input/pose.mp4",
+    help="reference_video path",
+)
+parser.add_argument(
+    "--reference_image",
+    default="test/input/first_frame.png",
+    type=str,
+    help="reference_video path",
+)
+parser.add_argument(
+    "--vace_scale",
+    type=float,
+    default=0.8,
+    help="Scaling factor for VACE.",
 )
 parser.add_argument(
     "--prompt",
     type=str,
-    default="Close-up of a young man with dark hair tied back, wearing a white kimono adorned with a red floral pattern. He sits against a backdrop of sliding doors with blue accents. His expression shifts from neutral to a slight smile, then to a surprised look. The camera remains static, focusing on his face and upper body as he appears to be reacting to something off-screen. The lighting is soft and natural, suggesting daytime.",
+    default="一个女人举起双手",
     help="Text prompt for video generation",
 )
 parser.add_argument(
-    "--output", type=str, default="test/output/lecun.mp4", help="Output video file path"
+    "--output", type=str, default="test/output/woman.mp4", help="Output video file path"
 )
 parser.add_argument(
     "--seed", type=int, default=0, help="Random seed for reproducibility"
@@ -31,7 +46,12 @@ parser.add_argument(
 parser.add_argument(
     "--num_inference_steps", type=int, default=20, help="Number of inference steps"
 )
-parser.add_argument("--lora_scale", type=float, default=1.0, help="Lora Scale")
+parser.add_argument(
+    "--vace_path",
+    type=str,
+    default="checkpoints/VACE/",
+    help="Path to base model checkpoint",
+)
 
 parser.add_argument(
     "--negative_prompt",
@@ -45,12 +65,6 @@ parser.add_argument(
 )
 parser.add_argument(
     "--quality", type=int, default=9, help="Output video quality (1-9)"
-)
-parser.add_argument(
-    "--base_path",
-    type=str,
-    default="checkpoints/base_model/",
-    help="Path to base model checkpoint",
 )
 parser.add_argument(
     "--stand_in_path",
@@ -67,16 +81,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+
 face_processor = FaceProcessor(antelopv2_path=args.antelopv2_path)
 ip_image = face_processor.process(args.ip_image)
 
-pipe = load_wan_pipe(base_path=args.base_path, torch_dtype=torch.bfloat16)
-
-pipe.load_lora(
-    pipe.dit,
-    args.lora_path,
-    alpha=1,
-)
+pipe = load_wan_pipe(base_path=args.vace_path, use_vace=True, torch_dtype=torch.bfloat16)
 
 set_stand_in(
     pipe,
@@ -85,7 +94,10 @@ set_stand_in(
 
 video = pipe(
     prompt=args.prompt,
+    vace_video=args.reference_video,
+    vace_reference_image=args.reference_image,
     negative_prompt=args.negative_prompt,
+    vace_scale=args.vace_scale,
     seed=args.seed,
     ip_image=ip_image,
     num_inference_steps=args.num_inference_steps,
