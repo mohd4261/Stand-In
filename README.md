@@ -189,6 +189,8 @@ This project is built upon the following excellent open-source projects:
 
 We sincerely thank the authors and contributors of these projects.
 
+The original raw material of our dataset was collected with the help of our team member [Binxin Yang](https://binxinyang.github.io/), and we appreciate his contribution!
+
 ---
 
 ## ✏ Citation
