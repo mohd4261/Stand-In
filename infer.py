@@ -40,7 +40,7 @@ parser.add_argument(
     "--fps", type=int, default=25, help="Frames per second for output video"
 )
 parser.add_argument(
-    "--quality", type=int, default=9, help="Output video quality (1-10)"
+    "--quality", type=int, default=9, help="Output video quality (1-9)"
 )
 parser.add_argument(
     "--base_path",
