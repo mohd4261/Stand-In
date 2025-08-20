@@ -90,7 +90,7 @@ face_processor = FaceProcessor(antelopv2_path=args.antelopv2_path)
 videomask_generator = VideoMaskGenerator(antelopv2_path=args.antelopv2_path)
 
 ip_image, ip_image_rgba = face_processor.process(args.ip_image, extra_input=True)
-face_mask = videomask_generator.process(args.input_video, dilation_kernel_size=10)
+input_video, face_mask, width, height, num_frames = videomask_generator.process(args.input_video, ip_image_rgba, random_horizontal_flip_chance=0.05, dilation_kernel_size=10)
 
 pipe = load_wan_pipe(
     base_path=args.base_path, face_swap=True, torch_dtype=torch.bfloat16
@@ -105,13 +105,15 @@ video = pipe(
     prompt=args.prompt,
     negative_prompt=args.negative_prompt,
     seed=args.seed,
+    width=width,
+    height=height,
+    num_frames=num_frames,
     denoising_strength=args.denoising_strength,
     ip_image=ip_image,
     face_mask=face_mask,
-    input_video=args.input_video,
+    input_video=input_video,
     num_inference_steps=args.num_inference_steps,
     tiled=args.tiled,
-    force_background_consistency=args.force_background_consistency,
-    ip_image_rgba=ip_image_rgba,
+    force_background_consistency=args.force_background_consistency
 )
 save_video(video, args.output, fps=args.fps, quality=args.quality)

@@ -507,52 +507,11 @@ class WanVideoPipeline_FaceSwap(BasePipeline):
         # Stand-In
         face_mask=None,
         ip_image=None,
-        force_background_consistency=False,
-        ip_image_rgba=None,
+        force_background_consistency=False
     ):
         if ip_image is not None:
             ip_image = self.encode_ip_image(ip_image)
         # Scheduler
-        if input_video is not None:
-            input_video = load_video_as_list(input_video)
-            if face_mask is not None:
-                if len(input_video) != len(face_mask):
-                    raise ValueError(
-                        "Input video and face mask must have the same number of frames."
-                    )
-
-                pasted_frames = []
-                for frame_pil, mask_pil in zip(input_video, face_mask):
-                    # Use a copy to avoid modifying the original frame list
-                    target_frame = frame_pil.copy()
-
-                    mask_array = mask_pil
-                    if mask_array.ndim == 3:
-                        mask_gray = cv2.cvtColor(mask_array, cv2.COLOR_RGB2GRAY)
-                    else:
-                        mask_gray = mask_array
-
-                    if mask_gray.dtype != np.uint8:
-                        mask_gray = mask_gray.astype(np.uint8)
-                    contours, _ = cv2.findContours(
-                        mask_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-                    )
-
-                    if not contours:
-                        pasted_frames.append(target_frame)
-                        continue
-
-                    largest_contour = max(contours, key=cv2.contourArea)
-                    x, y, w, h = cv2.boundingRect(largest_contour)
-
-                    face_to_paste = ip_image_rgba.resize(
-                        (w, h), Image.Resampling.LANCZOS
-                    )
-                    target_frame.paste(face_to_paste, (x, y), face_to_paste)
-
-                    pasted_frames.append(target_frame)
-                input_video = pasted_frames
-
         self.scheduler.set_timesteps(
             num_inference_steps,
             denoising_strength=denoising_strength,

@@ -2,6 +2,6 @@ __pycache__/
 *.safetensors
 *.bin
 checkpoints/
-test/ouput
+test/output
 *.onnx
 *.json
